@@ -16,10 +16,20 @@ const userSchema = new mongoose.Schema({
         lowercase: true,
         trim: true,
         unique: true,
+        validate(value) {
+            if(!validator.isEmail(value)) {
+                throw new Error("Email is Invalid");
+            }
+        }
     },
     password:{
         type: String,
-        required: true
+        required: true,
+        validate(value) {
+            if(!validator.isStrongPassword(value)) {
+                throw new Error("Enter a strong password");
+            }
+        }
     },
     age:{
         type: Number,
@@ -28,13 +38,18 @@ const userSchema = new mongoose.Schema({
     gender:{
         type: String,
         validate(value){//only run when createing new object not while patching by default and we will need to enable runValidators 
-            if(!['male','female','others'].includes(value)){
+            if(!['male','female','others'].includes(value)) {
                 throw new Error("Gender is Invalid");
             }
         }
     },
     photoUrl:{
-        type: String
+        type: String,
+        validate(value) {
+            if(!validator.isURL(value)) {
+                throw new Error("PhotoUrl is Invalid");
+            }
+        }
     },
     about:{
         type: String,
