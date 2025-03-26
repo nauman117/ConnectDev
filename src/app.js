@@ -56,18 +56,26 @@ app.delete("/user", async (req,res) => {
 
 
 //Update data of the user
-app.patch("/user", async (req,res) => {
-    const userId = req.body.userId;
+app.patch("/user/:userId", async (req,res) => {
+    const userId = req.params.userId;
     const data = req.body;
+    const ALLOWED_UPDATES = ["photoUrl", "about", "gender"];
     try{
+        const isUpdateAllowed = Object.keys(data).every(k=>ALLOWED_UPDATES.includes(k));
+        if(!isUpdateAllowed){
+            throw new Error("Update not allowed");
+        }
+        if(data?.skills.length>10){
+            throw new Error("Skills can not be more than 10");
+        }
         const user = await User.findByIdAndUpdate({ _id : userId }, data, {
             returnDocument:"after",
-            runValidators //now custom age valiadtor is run 
+            runValidators: true //now custom age valiadtor is run 
         });//any other data apart from scheema is ignored
         if(!user) return res.status(404).send("User not found");
         res.send("User updated sucessfully");
     } catch (err) {
-        res.status(400).json("Something went wrong.")
+        res.status(400).json("Something went wrong."+err)
     }
 });
 
