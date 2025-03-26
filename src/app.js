@@ -15,7 +15,7 @@ app.post("/signup",async (req, res) => {
         await user.save();
         res.send("User saved successfully");
     } catch(err) {
-        res.status(400).send("Error Saving User", err.message)
+        res.status(400).json({ error: "Error Saving User", message: err.message });    
     }
 });
 
@@ -28,7 +28,7 @@ app.get("/user", async (req,res) => {
         if(!user) return res.status(404).send("User not found");
         res.send(user);
     } catch (err) {
-        res.status(400).send("Something went wrong.")
+        res.status(400).json("Something went wrong.")
     }
 });
 
@@ -38,7 +38,7 @@ app.get("/feed", async (req,res) => {
         const users = await User.find({});
         res.send(users);
     } catch (err) {
-        res.status(400).send("Something went wrong.")
+        res.status(400).json("Something went wrong.")
     }
 });
 
@@ -50,7 +50,7 @@ app.delete("/user", async (req,res) => {
         if(!user) return res.status(404).send("User not found");
         res.send("User deleted sucessfully");
     } catch (err) {
-        res.status(400).send("Something went wrong.")
+        res.status(400).json("Something went wrong.")
     }
 });
 
@@ -61,13 +61,13 @@ app.patch("/user", async (req,res) => {
     const data = req.body;
     try{
         const user = await User.findByIdAndUpdate({ _id : userId }, data, {
-            returnDocument:"after"
+            returnDocument:"after",
+            runValidators //now custom age valiadtor is run 
         });//any other data apart from scheema is ignored
-        console.log("🚀 ~ app.patch ~ user:", user)
         if(!user) return res.status(404).send("User not found");
         res.send("User updated sucessfully");
     } catch (err) {
-        res.status(400).send("Something went wrong.")
+        res.status(400).json("Something went wrong.")
     }
 });
 
@@ -75,7 +75,7 @@ connectDB()
 .then(
     ()=>{
         console.log('db connected');
-        app.listen(3000,()=>{console.log("server listening on 3000")});
+        app.listen(3007,()=>{console.log("server listening on 3007")});
     }
 ) 
 .catch(err=>console.error('db connection failed due to ,',err));
