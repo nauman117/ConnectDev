@@ -1,21 +1,51 @@
 console.log("Starting a new Project");
 
 const express = require("express");
+const bcrypt = require("bcrypt");
 const { connectDB } = require("./config/database");
 const { User } = require("./models/user");
+const { validateSignUpData } = require("./utils/validation");
 
 const app = express();
 
 app.use(express.json());//processing json data middle ware and no route means applicable for all app routes
 
 app.post("/signup",async (req, res) => {
-    
-    try { 
-        const user = new User(req.body);
+    try {
+        validateSignUpData(req);
+
+        const { password } = req.body;
+        const saltRounds = 10;
+        const passwordHash = await bcrypt.hash(password, saltRounds);
+
+        const user = new User({
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            emailId: req.body.emailId,
+            password: passwordHash
+        });
         await user.save();
         res.send("User saved successfully");
     } catch(err) {
         res.status(400).json({ error: "Error Saving User", message: err.message });    
+    }
+});
+
+app.post("/login",async (req, res) => {
+    const { emailId, password } = request.body;
+    try {
+        const user = User.findOne({ emailId:emailId })
+        if(!user){
+            throw  new Error("Invalid credentials")
+        }
+
+        isPasswordValid = bcrypt.compare(password, user.password);
+        if(!isPasswordValid){
+            throw  new Error("Invalid credentials")
+        }
+        res.send("User loggedin sucessfully");
+    } catch(err) {
+        res.status(400).json({ error: "Error:", message: err.message });    
     }
 });
 
