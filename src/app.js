@@ -1,6 +1,8 @@
 console.log("Starting a new Project");
 
 const express = require("express");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { connectDB } = require("./config/database");
 const { User } = require("./models/user");
@@ -8,7 +10,8 @@ const { validateSignUpData } = require("./utils/validation");
 
 const app = express();
 
-app.use(express.json());//processing json data middle ware and no route means applicable for all app routes
+app.use(express.json());//reads json data middleware and no route means applicable for all app routes
+app.use(cookieParser());//reads cookie data middleware
 
 app.post("/signup",async (req, res) => {
     try {
@@ -32,19 +35,43 @@ app.post("/signup",async (req, res) => {
 });
 
 app.post("/login",async (req, res) => {
-    const { emailId, password } = request.body;
+    const { emailId, password } = req.body;
     try {
-        const user = User.findOne({ emailId:emailId })
+        const user = await User.findOne({ emailId: emailId })
         if(!user){
-            throw  new Error("Invalid credentials")
+            throw new Error("Invalid credentials")
         }
 
-        isPasswordValid = bcrypt.compare(password, user.password);
+        isPasswordValid = await bcrypt.compare(password, user.password);
         if(!isPasswordValid){
-            throw  new Error("Invalid credentials")
+            throw new Error("Invalid credentials")
         }
+        const token = await jwt.sign(
+            {_id: user._id},
+            "DEV@CONNECT$123");
+
+        res.cookie("token",token)
         res.send("User loggedin sucessfully");
     } catch(err) {
+        res.status(400).json({ error: "Error:", message: err.message });    
+    }
+});
+
+app.get("/profile", async (req,res) => {
+    try {
+        const cookies = req.cookies;
+        const { token } = cookies;
+        if(!token){
+            throw new Error("Invalid token");
+        }
+        const decodedMessage = await jwt.verify(token, "DEV@CONNECT$123");
+        const { _id } = decodedMessage;
+        const user = await User.findById(_id);
+        if(!user){
+            throw new Error("User not found");
+        }
+        res.send(user);
+    } catch (err) {
         res.status(400).json({ error: "Error:", message: err.message });    
     }
 });
