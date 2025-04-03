@@ -40,6 +40,10 @@ const userSchema = new mongoose.Schema({
     },
     gender:{
         type: String,
+        enum:{
+            values = ['male','female','others'],
+            message = `{VALUE} is not a valid gender type`
+        },
         validate(value){//only run when createing new object not while patching by default and we will need to enable runValidators 
             if(!['male','female','others'].includes(value)) {
                 throw new Error("Gender is Invalid");
