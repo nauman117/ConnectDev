@@ -65,12 +65,12 @@ userRouter.get("/feed", userAuth, async (req, res) => {
 
         const hideUsersFromFeed = new Set();
         connectionRequest.forEach( req => {
-            hideUsersFromFeed.Add(req.fromUserId.toString());
-            hideUsersFromFeed.Add(req.toUserId.toString());
+            hideUsersFromFeed.add(req.fromUserId.toString());
+            hideUsersFromFeed.add(req.toUserId.toString());
         });
-        hideUsersFromFeed.Add(loggedInUser._id);
+        hideUsersFromFeed.add(loggedInUser._id);
 
-        const data = User.find({
+        const data = await User.find({
             _id: { $nin: Array.from(hideUsersFromFeed) }
         })
         .select(USER_SAFE_DATA)
