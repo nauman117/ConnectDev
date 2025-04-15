@@ -9,7 +9,10 @@ const { connectDB } = require("./config/database");
 const cors = require("cors");
 
 
-app.use(cors());
+app.use(cors({
+    origin:"http://localhost:5173",
+    credentials:true
+}));
 app.use(express.json());//reads json data middleware and no route means applicable for all app routes
 app.use(cookieParser());//reads cookie data middleware
 
