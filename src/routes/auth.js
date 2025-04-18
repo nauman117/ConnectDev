@@ -20,10 +20,16 @@ authRouter.post("/signup", async (req, res) => {
             emailId: req.body.emailId,
             password: passwordHash
         });
-        await user.save();
-        res.send("User saved successfully");
-    } catch(err) {
-        res.status(400).json({ error: "Error Saving User", message: err.message });    
+        const savedUser = await user.save();
+        const token = await savedUser.getJWT();
+
+        res.cookie("token", token, {
+            expires: new Date(Date.now() + 8 * 3600000),
+        });
+
+        res.json({ message: "User Added successfully!", data: savedUser });
+    } catch (err) {
+        res.status(400).json({ error: "Error Saving User", message: err.message });
     }
 });
 
@@ -31,22 +37,22 @@ authRouter.post("/login", async (req, res) => {
     const { emailId, password } = req.body;
     try {
         const user = await User.findOne({ emailId: emailId })
-        if(!user){
+        if (!user) {
             throw new Error("Invalid credentials")
         }
 
         isPasswordValid = await user.validatePassword(password);
-        if(!isPasswordValid){
+        if (!isPasswordValid) {
             throw new Error("Invalid credentials")
         }
         const token = await user.getJWT();
 
-        res.cookie("token",token,{
+        res.cookie("token", token, {
             expires: new Date(Date.now() + 8 * 3600000)
         })
         res.send(user);
-    } catch(err) {
-        res.status(400).json({ error: "Error:", message: err.message });    
+    } catch (err) {
+        res.status(400).json({ error: "Error:", message: err.message });
     }
 });
 
@@ -57,8 +63,8 @@ authRouter.post("/logout", async (req, res) => {
         });
 
         res.send();
-    } catch(err) {
-        res.status(400).json({ error: "Error:", message: err.message });    
+    } catch (err) {
+        res.status(400).json({ error: "Error:", message: err.message });
     }
 });
 

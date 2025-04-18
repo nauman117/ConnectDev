@@ -8,11 +8,9 @@ const requestRouter = express.Router();
 
 requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res) => {
     try {
-
         const fromUserId = req.user._id;
         const toUserId = req.params.toUserId;
         const status = req.params.status;
-
         //validations
         const allowedStatus = ["ignored","interested"];
         if(!allowedStatus.includes(status)){            
@@ -48,7 +46,7 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res)
 
         res.json({
             message: req.user.firstName + status + toUser.firstName,
-            data: connectionRequest
+            data: data
         });
 
     } catch (err) {
