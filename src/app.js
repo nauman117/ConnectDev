@@ -16,7 +16,7 @@ app.use(cors({
 app.use(express.json());//reads json data middleware and no route means applicable for all app routes
 app.use(cookieParser());//reads cookie data middleware
 
-const authRouter = require("./Routes/auth");
+const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
 const requestRouter = require("./routes/request");
 const userRouter = require("./routes/user");
